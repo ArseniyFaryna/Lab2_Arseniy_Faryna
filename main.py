@@ -90,8 +90,8 @@ class Agent(Person):
             print("Invalid rental index")
 
     def show_all_rentals(self, rental_manager):
-        for i, r in enumerate(rental_manager.get_rentals()):
-            print(f"[{i}] Client {r['client'].first_name} {r['client'].last_name}: "
+        for r in rental_manager.get_rentals():
+            print(f"Client {r['client'].first_name} {r['client'].last_name}: "
                   f"{r['property_address']} from {r['start_date']} to {r['end_date']}, "
                   f"${r['monthly_price']}/month | Status: {r['status']}")
 
