@@ -17,13 +17,25 @@ class Person:
     def phone_number(self):
         return self._phone_number
 
+    @phone_number.setter
+    def phone_number(self, new_phone):
+        if Person.validate_phone(new_phone):
+            self._phone_number = new_phone
+            print(f"Phone number updated to {new_phone}")
+        else:
+            print("Invalid phone number format")
+
     @property
     def email(self):
         return self._email
 
     def show_information(self):
         print(f"Name: {self._first_name} {self._last_name}, "
-                f"Phone: {self._phone_number}, Email: {self._email}")
+              f"Phone: {self._phone_number}, Email: {self._email}")
+
+    @staticmethod
+    def validate_phone(phone):
+        return phone.startswith("+380") and len(phone) == 13
 
 
 class RentalManager:
@@ -46,17 +58,18 @@ class RentalManager:
         return list(self._rentals)
 
 
-class Client(Person):
+class Client(Person, RentalManager):
     def __init__(self, first_name, last_name, phone_number, email, client_id):
-        super().__init__(first_name, last_name, phone_number, email)
+        Person.__init__(self, first_name, last_name, phone_number, email)
+        RentalManager.__init__(self)
         self._client_id = client_id
 
     def show_information(self):
         print(f"Client ID: {self._client_id}, Name: {self.first_name} {self.last_name}, "
               f"Phone: {self.phone_number}, Email: {self.email}")
 
-    def rent_property(self, rental_manager, property_address, start_date, end_date, monthly_price):
-        rental_manager.add_rental(self, property_address, start_date, end_date, monthly_price)
+    def rent_property(self, property_address, start_date, end_date, monthly_price):
+        self.add_rental(self, property_address, start_date, end_date, monthly_price)
 
 
 class Agent(Person):
@@ -84,22 +97,28 @@ class Agent(Person):
 
 
 if __name__ == "__main__":
-    rentals = RentalManager()
+    print("Phone validation:", Person.validate_phone("+380123456789"))
 
-    client1 = Client("Arseniy", "Faryna", "+3801234567", "farynaarseniy@gmail.com", 1)
-    client2 = Client("Demyan", "Vorobets", "+3807654321", "demyanvorobets@gmail.com", 2)
-    agent1 = Agent("Danylo", "Siatetskiy", "+3809876543", "danylosiatetskiy@gmail.com", 101)
+    client1 = Client("Arseniy", "Faryna", "+380123456789", "farynaarseniy@gmail.com", 1)
+    client2 = Client("Demyan", "Vorobets", "+380765432198", "demyanvorobets@gmail.com", 2)
+    agent1 = Agent("Danylo", "Siatetskiy", "+380987654321", "danylosiatetskiy@gmail.com", 101)
 
-    client1.rent_property(rentals, "Stryi, Shevchenko St, 45", "2025-10-01", "2026-03-01", 1200)
-    client2.rent_property(rentals, "Lviv, Naukova St, 67", "2025-09-15", "2025-12-15", 800)
+    client1.rent_property("Stryi, Shevchenko St, 45", "2025-10-01", "2026-03-01", 1200)
+    client2.rent_property("Lviv, Naukova St, 67", "2025-09-15", "2025-12-15", 800)
 
     print("\nAll rentals before approval:")
-    agent1.show_all_rentals(rentals)
+    agent1.show_all_rentals(client1)
+    agent1.show_all_rentals(client2)
 
-
-    agent1.approve_rental(rentals, 0)
+    agent1.approve_rental(client1, 0)
 
     print("\nAll rentals after approval:")
-    agent1.show_all_rentals(rentals)
+    agent1.show_all_rentals(client1)
+    agent1.show_all_rentals(client2)
+
+    print("\nChanging phone number with setter")
+    client1.phone_number = "+380111111111"
+    client2.phone_number = "12345"
 
     client1.show_information()
+    agent1.show_information()
